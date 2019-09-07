@@ -21,6 +21,21 @@ enum DayOfWeek {
   SUNDAY,
 }
 
+enum MonthOfYear {
+  JANUARY,
+  FEBRUARY,
+  MARCH,
+  APRIL,
+  MAY,
+  JUNE,
+  JULY,
+  AUGUST,
+  SEPTEMBER,
+  OCTOBER,
+  NOVEMBER,
+  DECEMBER
+}
+
 impl DayOfWeek {
   fn as_day_number(&self) -> isize {
     match self {
@@ -111,7 +126,7 @@ impl DateTime {
       number_of_12s + last_two_mod_12
         + number_of_4s + anchor_day
     ) % 7;
-    //
+    let leap_year = self.is_leap_year();
 
 
 
