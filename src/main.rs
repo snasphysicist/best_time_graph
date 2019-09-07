@@ -6,6 +6,16 @@ use regex::Regex;
 
 const DATE_PATTERN : &str = r"(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})Z"; //-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z";
 
+enum DayOfWeek {
+  MONDAY,
+  TUESDAY,
+  WEDNESDAY,
+  THURSDAY,
+  FRIDAY,
+  SATURDAY,
+  SUNDAY,
+}
+
 struct DateTime {
   year: isize,
   month: isize,
