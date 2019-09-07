@@ -6,6 +6,11 @@ use regex::Regex;
 
 const DATE_PATTERN : &str = r"(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})Z"; //-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z";
 
+// Anchor days for doomsday algorithm
+const ANCHOR_DAY_1900 : DayOfWeek = DayOfWeek::WEDNESDAY;
+const ANCHOR_DAY_2000 : DayOfWeek = DayOfWeek::TUESDAY;
+const ANCHOR_DAY_2100 : DayOfWeek = DayOfWeek::SUNDAY;
+
 enum DayOfWeek {
   MONDAY,
   TUESDAY,
@@ -16,6 +21,32 @@ enum DayOfWeek {
   SUNDAY,
 }
 
+impl DayOfWeek {
+  fn as_day_number(&self) -> isize {
+    match self {
+      DayOfWeek::SUNDAY => 0,
+      DayOfWeek::MONDAY => 1,
+      DayOfWeek::TUESDAY => 2,
+      DayOfWeek::WEDNESDAY => 3,
+      DayOfWeek::THURSDAY => 4,
+      DayOfWeek::FRIDAY => 5,
+      DayOfWeek::SATURDAY => 6,
+    }
+  }
+  fn from_day_number(day_number : isize) -> Option<DayOfWeek> {
+    match day_number {
+      0 => Some(DayOfWeek::SUNDAY),
+      1 => Some(DayOfWeek::MONDAY),
+      2 => Some(DayOfWeek::TUESDAY),
+      3 => Some(DayOfWeek::WEDNESDAY),
+      4 => Some(DayOfWeek::THURSDAY),
+      5 => Some(DayOfWeek::FRIDAY),
+      6 => Some(DayOfWeek::SATURDAY),
+      _ => None,
+    }
+  }
+}
+
 struct DateTime {
   year: isize,
   month: isize,
@@ -23,6 +54,54 @@ struct DateTime {
   hour: isize,
   minute: isize,
   second: isize
+}
+
+impl DateTime {
+  // Doomsday algorithm
+  fn weekday(&self) -> Result<DayOfWeek,String> {
+    // Last two digits of year (ylt)
+    let year_last_two = self.year % 100;
+    // Quotient when divided by 12 (nt)
+    let number_of_12s = year_last_two / 12;
+    // Last two modulo 12
+    let last_two_mod_12 = year_last_two % 6;
+    // Quotient when mod 12 divided by 4
+    let number_of_4s = last_two_mod_12 / 4;
+    // Anchor day for this century
+    let anchor_day = {
+      match self.year - year_last_two {
+        1900 => ANCHOR_DAY_1900.as_day_number(),
+        2000 => ANCHOR_DAY_2000.as_day_number(),
+        2100 => ANCHOR_DAY_2100.as_day_number(),
+        // Can't handle dates < 1900, > 2199
+        _ => return Err(
+          format!(
+            "Year {} outside of handled centuries",
+            self.year
+          )
+        )
+      }
+    };
+    // Sum of results mod 7 is day as int
+    let day_number = (
+      number_of_12s + last_two_mod_12
+        + number_of_4s + anchor_day
+    ) % 7;
+    // Return day of week, if possible
+    match DayOfWeek::from_day_number(day_number) {
+      Some(day_of_week) => {
+        Ok(day_of_week)
+      }
+      None => {
+        Err(
+          format!(
+            "Doomsday algorithm found day number {}, out of range",
+            day_number
+          )
+        )
+      }
+    }
+  }
 }
 
 impl std::fmt::Display for DateTime {
@@ -198,11 +277,15 @@ fn main() {
   let read_file : Result<String, Error> = fs::read_to_string(filename);
 
   match read_file {
+    // Could read file
     Ok(contents) => {
       for datetime_string in contents.lines() {
+        // Try to split into date , data
         let comma_position = datetime_string.find(",");
         match comma_position {
+          // Could split by first comma
           Some(i) => {
+            // Try to read the date into a DateTime
             match parse_date(&datetime_string[0..i]) {
               Some(d) => {
                 println!("From {} parsed {}", datetime_string, d);
