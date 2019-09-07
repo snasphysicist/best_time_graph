@@ -47,6 +47,23 @@ impl DayOfWeek {
   }
 }
 
+impl std::fmt::Display for DayOfWeek {
+  fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+    let day_name = {
+      match &self {
+        DayOfWeek::SUNDAY => "Sunday",
+        DayOfWeek::MONDAY => "Monday",
+        DayOfWeek::TUESDAY => "Tuesday",
+        DayOfWeek::WEDNESDAY => "Wednesday",
+        DayOfWeek::THURSDAY => "Thursday",
+        DayOfWeek::FRIDAY => "Friday",
+        DayOfWeek::SATURDAY => "Saturday",
+      }
+    };
+    write!(f, "{}", day_name)
+  }
+}
+
 struct DateTime {
   year: isize,
   month: isize,
@@ -57,6 +74,13 @@ struct DateTime {
 }
 
 impl DateTime {
+  fn is_leap_year(&self) -> bool {
+    self.year % 400 == 0        // Year divisible by 400
+    || (
+      self.year % 4 == 0        // Or year divisible by 4
+      && self.year % 100 == 0   // But not 100
+    )
+  }
   // Doomsday algorithm
   fn weekday(&self) -> Result<DayOfWeek,String> {
     // Last two digits of year (ylt)
@@ -83,10 +107,15 @@ impl DateTime {
       }
     };
     // Sum of results mod 7 is day as int
-    let day_number = (
+    let doomsday_number = (
       number_of_12s + last_two_mod_12
         + number_of_4s + anchor_day
     ) % 7;
+    //
+
+
+
+
     // Return day of week, if possible
     match DayOfWeek::from_day_number(day_number) {
       Some(day_of_week) => {
@@ -105,7 +134,7 @@ impl DateTime {
 }
 
 impl std::fmt::Display for DateTime {
-  fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+  fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
     write!(
       f,
       "{}-{}-{} {}:{}:{}",
@@ -289,6 +318,15 @@ fn main() {
             match parse_date(&datetime_string[0..i]) {
               Some(d) => {
                 println!("From {} parsed {}", datetime_string, d);
+                // Try to get day of week
+                match d.weekday() {
+                  Ok(dow) => {
+                    println!("Day is a {}", dow);
+                  }
+                  Err(e) => {
+                    println!("Encountered error when converting to weekday: {}", e);
+                  }
+                }
               }
               None => {
                 println!("Could not parse {}, {}", datetime_string, &datetime_string[0..i]);
