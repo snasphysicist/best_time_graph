@@ -33,13 +33,46 @@ enum MonthOfYear {
   SEPTEMBER,
   OCTOBER,
   NOVEMBER,
-  DECEMBER
+  DECEMBER,
 }
 
 // TODO DateTime anchor date, calls MonthOfYear anchor date
 // TODO Week day from anchor date/day
 
 impl MonthOfYear {
+  fn as_month_number(&self) -> isize {
+    match self {
+      MonthOfYear::JANUARY => 1,
+      MonthOfYear::FEBRUARY => 2,
+      MonthOfYear::MARCH => 3,
+      MonthOfYear::APRIL => 4,
+      MonthOfYear::MAY => 5,
+      MonthOfYear::JUNE => 6,
+      MonthOfYear::JULY => 7,
+      MonthOfYear::AUGUST => 8,
+      MonthOfYear::SEPTEMBER => 9,
+      MonthOfYear::OCTOBER => 10,
+      MonthOfYear::NOVEMBER => 11,
+      MonthOfYear::DECEMBER => 12,
+    }
+  }
+  fn from_month_number(month_number : isize) -> Option<MonthOfYear> {
+    match month_number {
+      1 => Some(MonthOfYear::JANUARY),
+      2 => Some(MonthOfYear::FEBRUARY),
+      3 => Some(MonthOfYear::MARCH),
+      4 => Some(MonthOfYear::APRIL),
+      5 => Some(MonthOfYear::MAY),
+      6 => Some(MonthOfYear::JUNE),
+      7 => Some(MonthOfYear::JULY),
+      8 => Some(MonthOfYear::AUGUST),
+      9 => Some(MonthOfYear::SEPTEMBER),
+      10 => Some(MonthOfYear::OCTOBER),
+      11 => Some(MonthOfYear::NOVEMBER),
+      12 => Some(MonthOfYear::DECEMBER),
+      _ => None
+    }
+  }
   fn anchor_date(&self, is_leap_year : bool) -> isize {
     match self {
       MonthOfYear::JANUARY => {
@@ -65,7 +98,7 @@ impl MonthOfYear {
       MonthOfYear::SEPTEMBER => 5,
       MonthOfYear::OCTOBER => 10,
       MonthOfYear::NOVEMBER => 7,
-      MonthOfYear::DECEMBER => 12
+      MonthOfYear::DECEMBER => 12,
     }
   }
 }
