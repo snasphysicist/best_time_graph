@@ -36,9 +36,39 @@ enum MonthOfYear {
   DECEMBER
 }
 
-// TODO impl anchor date for months, argument leap year
 // TODO DateTime anchor date, calls MonthOfYear anchor date
 // TODO Week day from anchor date/day
+
+impl MonthOfYear {
+  fn anchor_date(&self, is_leap_year : bool) -> isize {
+    match self {
+      MonthOfYear::JANUARY => {
+        if is_leap_year {
+          4
+        } else {
+          3
+        }
+      },
+      MonthOfYear::FEBRUARY => {
+        if is_leap_year {
+          29
+        } else {
+          28
+        }
+      },
+      MonthOfYear::MARCH => 7,
+      MonthOfYear::APRIL => 4,
+      MonthOfYear::MAY => 9,
+      MonthOfYear::JUNE => 6,
+      MonthOfYear::JULY => 11,
+      MonthOfYear::AUGUST => 8,
+      MonthOfYear::SEPTEMBER => 5,
+      MonthOfYear::OCTOBER => 10,
+      MonthOfYear::NOVEMBER => 7,
+      MonthOfYear::DECEMBER => 12
+    }
+  }
+}
 
 impl DayOfWeek {
   fn as_day_number(&self) -> isize {
