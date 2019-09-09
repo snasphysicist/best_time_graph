@@ -309,7 +309,13 @@ impl Time {
   }
   fn from_minutes_from_midnight(minutes : isize) -> Result<Time, String> {
     if minutes >= 60*24 {
-      Err("Argument supplied is greater than number of minutes in a day".into_string())
+      Err(
+        format!(
+          "Argument supplied ({}) is greater than number of minutes in a day ({})",
+          minutes,
+          60*24
+        )
+      )
     } else {
       return Ok(
         Time {
@@ -507,8 +513,18 @@ impl TimeBin {
   fn range(start_time : isize, interval : isize, number : isize)
     -> Result<Vec<TimeBin>, String> {
     // Check all bins falls within a single day
-    if (start_time + number*interval) > 60*24 {
-      Err("Requested range spans more than a whole day".into_string())
+    if (start_time + number*interval) >= 60*24 {
+      Err(
+        format!(
+          "Requested range ({} intervals of length {}, starting at {} minutes -> end time {} minutes) \
+          spans more than a whole day (which lasts {} minutes)",
+          number,
+          interval,
+          start_time,
+          start_time + number*interval,
+          60*24
+        )
+      )
     } else {
       let mut bins : Vec<TimeBin> = vec!();
       for i in 0..number {
