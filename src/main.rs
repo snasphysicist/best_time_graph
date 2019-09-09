@@ -4,12 +4,25 @@ use std::io::Error;
 
 use regex::Regex;
 
+/*
+ * Global Constants
+ */
+
 const DATE_PATTERN : &str = r"(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})Z"; //-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z";
 
 // Anchor days for doomsday algorithm
 const ANCHOR_DAY_1900 : DayOfWeek = DayOfWeek::WEDNESDAY;
 const ANCHOR_DAY_2000 : DayOfWeek = DayOfWeek::TUESDAY;
 const ANCHOR_DAY_2100 : DayOfWeek = DayOfWeek::SUNDAY;
+
+/*
+ *
+ */
+
+/*
+ * Day Of Week enum
+ * and associated methods
+ */
 
 enum DayOfWeek {
   MONDAY,
@@ -35,9 +48,6 @@ enum MonthOfYear {
   NOVEMBER,
   DECEMBER,
 }
-
-// TODO DateTime anchor date, calls MonthOfYear anchor date
-// TODO Week day from anchor date/day
 
 impl MonthOfYear {
   fn as_month_number(&self) -> isize {
@@ -418,6 +428,9 @@ fn main() {
 
   let read_file : Result<String, Error> = fs::read_to_string(filename);
 
+  // Collect results here
+  let mut data_points : Vec<DateTime> = vec!();
+
   match read_file {
     // Could read file
     Ok(contents) => {
@@ -434,6 +447,7 @@ fn main() {
                 // Try to get day of week
                 match d.weekday() {
                   Ok(dow) => {
+                    data_points.push(d);
                     println!("Day is a {}", dow);
                   }
                   Err(e) => {
@@ -456,6 +470,52 @@ fn main() {
     Err(description) => {
       println!("Could not read file, error {}", description);
     }
+  }
+
+  // Sort data into days
+  let mut days : Vec<Vec<DateTime>> = vec!(
+    vec!(),
+    vec!(),
+    vec!(),
+    vec!(),
+    vec!(),
+    vec!(),
+    vec!()
+  );
+
+  for data_point in data_points {
+    match data_point.weekday() {
+      Ok(dow) => {
+        match days.get_mut(dow.as_day_number() as usize) {
+          Some(d) => {
+            d.push(data_point);
+          }
+          None => {
+            println!(
+              "Could not push {}, found invalid day number {}",
+              data_point,
+              dow.as_day_number()
+            );
+          }
+        }
+      }
+      Err(e) => {
+        println!(
+          "Sorting data in days failed for {} with message {}",
+          data_point,
+          e
+        );
+      }
+    }
+  }
+
+  // Check
+  for i in 0..days.len() {
+    println!(
+      "On {}th day, {} data points",
+      i,
+      days[i].len()
+    );
   }
 
 }
