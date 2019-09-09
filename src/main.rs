@@ -294,6 +294,47 @@ impl std::fmt::Display for DateTime {
  */
 
 /*
+ * Time struct, for times agnostic of days
+ * plus associated methods
+ */
+struct Time {
+  hour : isize,
+  minute : isize,
+  second : isize
+}
+
+impl Time {
+  fn to_minutes_from_midnight(&self) -> isize {
+    return self.hour*60 + self.minute;
+  }
+  fn from_minutes_from_midnight(minutes : isize) -> Result<Time, String> {
+    if minutes >= 60*24 {
+      Err("Argument supplied is greater than number of minutes in a day".into_string())
+    } else {
+      return Ok(
+        Time {
+          hour: minutes/60,
+          minute: minutes%60,
+          second: 0
+        }
+      )
+    }
+  }
+}
+
+impl std::fmt::Display for Time {
+  fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+    write!(
+      f,
+      "{}:{}:{}",
+      self.hour,
+      self.minute,
+      self.second
+    )
+  }
+}
+
+/*
  * Functions used in main
  */
 
