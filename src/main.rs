@@ -34,6 +34,58 @@ enum DayOfWeek {
   SUNDAY,
 }
 
+impl DayOfWeek {
+  fn as_day_number(&self) -> isize {
+    match self {
+      DayOfWeek::SUNDAY => 0,
+      DayOfWeek::MONDAY => 1,
+      DayOfWeek::TUESDAY => 2,
+      DayOfWeek::WEDNESDAY => 3,
+      DayOfWeek::THURSDAY => 4,
+      DayOfWeek::FRIDAY => 5,
+      DayOfWeek::SATURDAY => 6,
+    }
+  }
+  fn from_day_number(day_number : isize) -> Option<DayOfWeek> {
+    match day_number {
+      0 => Some(DayOfWeek::SUNDAY),
+      1 => Some(DayOfWeek::MONDAY),
+      2 => Some(DayOfWeek::TUESDAY),
+      3 => Some(DayOfWeek::WEDNESDAY),
+      4 => Some(DayOfWeek::THURSDAY),
+      5 => Some(DayOfWeek::FRIDAY),
+      6 => Some(DayOfWeek::SATURDAY),
+      _ => None,
+    }
+  }
+}
+
+impl std::fmt::Display for DayOfWeek {
+  fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+    let day_name = {
+      match &self {
+        DayOfWeek::SUNDAY => "Sunday",
+        DayOfWeek::MONDAY => "Monday",
+        DayOfWeek::TUESDAY => "Tuesday",
+        DayOfWeek::WEDNESDAY => "Wednesday",
+        DayOfWeek::THURSDAY => "Thursday",
+        DayOfWeek::FRIDAY => "Friday",
+        DayOfWeek::SATURDAY => "Saturday",
+      }
+    };
+    write!(f, "{}", day_name)
+  }
+}
+
+/*
+ *
+ */
+
+/*
+ * Month of Year enum
+ * with associated methods
+ */
+
 enum MonthOfYear {
   JANUARY,
   FEBRUARY,
@@ -113,48 +165,14 @@ impl MonthOfYear {
   }
 }
 
-impl DayOfWeek {
-  fn as_day_number(&self) -> isize {
-    match self {
-      DayOfWeek::SUNDAY => 0,
-      DayOfWeek::MONDAY => 1,
-      DayOfWeek::TUESDAY => 2,
-      DayOfWeek::WEDNESDAY => 3,
-      DayOfWeek::THURSDAY => 4,
-      DayOfWeek::FRIDAY => 5,
-      DayOfWeek::SATURDAY => 6,
-    }
-  }
-  fn from_day_number(day_number : isize) -> Option<DayOfWeek> {
-    match day_number {
-      0 => Some(DayOfWeek::SUNDAY),
-      1 => Some(DayOfWeek::MONDAY),
-      2 => Some(DayOfWeek::TUESDAY),
-      3 => Some(DayOfWeek::WEDNESDAY),
-      4 => Some(DayOfWeek::THURSDAY),
-      5 => Some(DayOfWeek::FRIDAY),
-      6 => Some(DayOfWeek::SATURDAY),
-      _ => None,
-    }
-  }
-}
+/*
+ *
+ */
 
-impl std::fmt::Display for DayOfWeek {
-  fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-    let day_name = {
-      match &self {
-        DayOfWeek::SUNDAY => "Sunday",
-        DayOfWeek::MONDAY => "Monday",
-        DayOfWeek::TUESDAY => "Tuesday",
-        DayOfWeek::WEDNESDAY => "Wednesday",
-        DayOfWeek::THURSDAY => "Thursday",
-        DayOfWeek::FRIDAY => "Friday",
-        DayOfWeek::SATURDAY => "Saturday",
-      }
-    };
-    write!(f, "{}", day_name)
-  }
-}
+/*
+ * DateTime struct
+ * with associated methods
+ */
 
 struct DateTime {
   year: isize,
@@ -270,6 +288,14 @@ impl std::fmt::Display for DateTime {
     )
   }
 }
+
+/*
+ *
+ */
+
+/*
+ * Functions used in main
+ */
 
 fn parse_date(date_string : &str) -> Option<DateTime> {
 
@@ -419,6 +445,51 @@ fn parse_date(date_string : &str) -> Option<DateTime> {
       return Option::None;
     }
 
+  }
+}
+
+/*
+ *
+ */
+
+/*
+ * Time bin struct and associated methods
+ */
+struct TimeBin {
+  lower_limit : isize,  // Minutes from 00:00
+  upper_limit : isize,  // Minutes from 00:00
+  count : isize,
+}
+
+impl TimeBin {
+  // Return a range of time bins
+  fn range(start_time : isize, interval : isize, number : isize)
+    -> Result<Vec<TimeBin>, String> {
+    // Check all bins falls within a single day
+    if (start_time + number*interval) > 60*24 {
+      Err("Requested range spans more than a whole day".into_string())
+    } else {
+      let mut bins : Vec<TimeBin> = vec!();
+      for i in 0..number {
+        bins.push(
+          TimeBin {
+            lower_limit: start_time + interval*i,
+            upper_limit: start_time + interval*(i+1),
+            count: 0
+          }
+        );
+      }
+      Ok(bins)
+    }
+  }
+  fn add(&mut self, datetime : DateTime) -> bool {
+    let time_to_check = datetime.hour*60 + datetime.minute;
+    if (time_to_check >= self.lower_limit) && (time_to_check < self.upper_limit) {
+      self.count += 1;
+      true
+    } else {
+      false
+    }
   }
 }
 
