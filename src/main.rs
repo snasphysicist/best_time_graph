@@ -193,13 +193,44 @@ impl DateTime {
       number_of_12s + last_two_mod_12
         + number_of_4s + anchor_day
     ) % 7;
+    // Determine whether this is a leap year
     let leap_year = self.is_leap_year();
-
-
-
-
+    // Get anchor date number for current month
+    let this_month = MonthOfYear::from_month_number(self.month);
+    let month_doomsday;
+    match this_month {
+      Some(m) => {
+        month_doomsday = m.anchor_date(leap_year);
+      },
+      None => {
+        return Err(
+          format!(
+            "Month number {} out of range",
+            self.month
+          )
+        );
+      }
+    }
+    // Calculate day number from doomsday date & day number
+    let mut date_counter = month_doomsday;
+    let mut day_counter = doomsday_number;
+    while date_counter != self.day {
+      if date_counter > self.day {
+        date_counter -= 1;
+        day_counter -= 1;
+      } else {
+        date_counter += 1;
+        day_counter += 1;
+      }
+      if day_counter < 0 {
+        day_counter = 6;
+      }
+      if day_counter > 6 {
+        day_counter = 0;
+      }
+    }
     // Return day of week, if possible
-    match DayOfWeek::from_day_number(day_number) {
+    match DayOfWeek::from_day_number(day_counter) {
       Some(day_of_week) => {
         Ok(day_of_week)
       }
@@ -207,7 +238,7 @@ impl DateTime {
         Err(
           format!(
             "Doomsday algorithm found day number {}, out of range",
-            day_number
+            day_counter
           )
         )
       }
