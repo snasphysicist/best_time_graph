@@ -36,6 +36,10 @@ enum MonthOfYear {
   DECEMBER
 }
 
+// TODO impl anchor date for months, argument leap year
+// TODO DateTime anchor date, calls MonthOfYear anchor date
+// TODO Week day from anchor date/day
+
 impl DayOfWeek {
   fn as_day_number(&self) -> isize {
     match self {
